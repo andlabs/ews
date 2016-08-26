@@ -30,7 +30,7 @@ type Message struct {
 	ItemClass		string		`xml:"t:ItemClass"`
 	Subject		string		`xml:"t:Subject"`
 	Body			Body			`xml:"t:Body"`
-	Sender		XMailbox		`xml:"t:Sender"`
+	Sender		OneMailbox	`xml:"t:Sender"`
 	ToRecipients	XMailbox		`xml:"t:ToRecipients"`
 }
 
@@ -39,12 +39,16 @@ type Body struct {
 	Body			[]byte	`xml:",chardata"`
 }
 
-type XMailbox struct {
+type OneMailbox struct {
 	Mailbox		Mailbox			`xml:"t:Mailbox"`
 }
 
+type XMailbox struct {
+	Mailbox		[]Mailbox			`xml:"t:Mailbox"`
+}
+
 type Mailbox struct {
-	EmailAddress		[]string		`xml:"t:EmailAddress"`
+	EmailAddress		string		`xml:"t:EmailAddress"`
 }
 
 func BuildTextEmail(from string, to []string, subject string, body []byte) ([]byte, error) {
@@ -56,8 +60,12 @@ func BuildTextEmail(from string, to []string, subject string, body []byte) ([]by
 	m.Subject = subject
 	m.Body.BodyType = "Text"
 	m.Body.Body = body
-	m.Sender.Mailbox.EmailAddress = append(m.Sender.Mailbox.EmailAddress, from)
-	m.ToRecipients.Mailbox.EmailAddress = append(m.ToRecipients.Mailbox.EmailAddress, to...)
+	m.Sender.Mailbox.EmailAddress = from
+	mb := make([]Mailbox, len(to))
+	for i, addr := range to {
+		mb[i].EmailAddress = addr
+	}
+	m.ToRecipients.Mailbox = append(m.ToRecipients.Mailbox, mb...)
 	c.Items.Message = append(c.Items.Message, *m)
 	return xml.MarshalIndent(c, "", "  ")
 }
