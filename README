@@ -27,3 +27,6 @@ the other exported types are just the raw data structures for the request XML; y
 
 I'm not sure if I'll develop this further; feel free to (warning: here be SOAP)
 some resources I used are in comments in the code
+
+TODOs
+- figure out why UTF-8 isn't used for email bodies, or how to force the encoding
